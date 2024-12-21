@@ -1,7 +1,7 @@
 from abc import ABC
 
 from . import Monitor
-from .info import LastInputInfo
+from stay_awake.dto import LastInputInfo
 from ctypes import *
 import sys
 

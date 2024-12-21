@@ -1,8 +1,6 @@
-import os
-import sys
 import logging
 
-from . import WindowsMonitor, Monitor, OsXMonitor, GnomeWaylandIdleMonitor, X11Monitor
+from . import *
 
 
 class MonitorFactory:

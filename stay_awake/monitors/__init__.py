@@ -1,8 +1,8 @@
-from .monitor import Monitor
-from .windows_monitor import WindowsMonitor
-from .os_x_monitor import OsXMonitor
-from .x_11_monitor import X11Monitor
-from .gnome_wayland_monitor import GnomeWaylandIdleMonitor
+from stay_awake.monitors.monitor import Monitor
+from stay_awake.monitors.windows_monitor import WindowsMonitor
+from stay_awake.monitors.os_x_monitor import OsXMonitor
+from stay_awake.monitors.x_11_monitor import X11Monitor
+from stay_awake.monitors.gnome_wayland_monitor import GnomeWaylandIdleMonitor
 
 __all__ = [
     'Monitor',

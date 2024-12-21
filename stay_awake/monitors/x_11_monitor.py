@@ -1,5 +1,5 @@
 from . import Monitor
-from .info import *
+from stay_awake.dto import *
 from abc import ABC
 from ctypes import cdll, util, c_void_p, c_char_p, c_uint32, POINTER, c_int
 from typing import Any
