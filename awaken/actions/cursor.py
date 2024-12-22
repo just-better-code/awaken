@@ -13,7 +13,8 @@ class Cursor:
         self._current = gui.position()
         self._interrupt = interrupt
         self._lock = Lock()
-        self._listener = MouseListener(self._interrupt, self._lock)
+        listener = MouseListener(self._interrupt, self._lock)
+        listener.start()
 
     def move(self, x: int, y: int, speed: float = 10, rand_k: float = 0.5) -> None:
         for step in self._steps(x, y):

@@ -8,7 +8,8 @@ class Keyboard:
     def __init__(self, interrupt: Event):
         self._interrupt = interrupt
         self._lock = Lock()
-        self._listener = KeyboardListener(self._interrupt, self._lock)
+        listener = KeyboardListener(self._interrupt, self._lock)
+        listener.start()
 
     def press(self, key: str) -> None:
         if not self._interrupt.is_set() :
