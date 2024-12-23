@@ -9,16 +9,17 @@ from awaken import *
 def main() -> None:
     logging.basicConfig()
     logging.root.setLevel(logging.NOTSET)
-    log = logging.getLogger(__name__)
+    log = logging.getLogger('Main')
     log.info('*** Program is started ***')
     args = parse_args()
     user_activity = Event()
-    activity = Event()
-    actor = Actor(activity, user_activity)
-    scheduler = Scheduler(activity, user_activity, args.get('idle'), args.get('delay'))
+    system_activity = Event()
+    actor = Actor(system_activity, user_activity)
+    scheduler = Scheduler(system_activity, user_activity, args.get('idle'), args.get('delay'))
 
     log.info('*** Lets work ***')
     while True:
+        scheduler.ping()
         if scheduler.is_must_wake_up():
             actor.move_cursor(args.get('dist'), args.get('speed'), args.get('rand_k'))
             actor.press_key(args.get('key'))

@@ -6,7 +6,7 @@ from threading import Event, Lock
 
 class Keyboard:
     def __init__(self, user_activity: Event, lock: Lock):
-        self._log = logging.getLogger(__name__)
+        self._log = logging.getLogger(__class__.__name__)
         self._user_activity = user_activity
         self._lock = lock
 

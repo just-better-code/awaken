@@ -9,7 +9,7 @@ class GnomeWaylandIdleMonitor(Monitor):
     @classmethod
     def validate(cls) -> None:
         if os.getenv('XDG_SESSION_TYPE', '').lower() != 'wayland':
-            raise OSError('Not a gnome')
+            raise OSError('Gnome wayland based system not detected')
 
     def __init__(self) -> None:
         address = DBusAddress(

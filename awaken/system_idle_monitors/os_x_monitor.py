@@ -9,7 +9,7 @@ class OsXMonitor(Monitor):
     @classmethod
     def validate(cls) -> None:
         if sys.platform != 'darwin':
-            raise OSError('Not a MacOs')
+            raise OSError('MacOs system not detected')
 
     def get_idle_time(self) -> float:
         cmd = ["ioreg", "-c", "IOHIDSystem"]
