@@ -3,7 +3,7 @@ import logging
 
 from threading import Event
 from time import sleep
-from awaken import *
+from awaken import Actor, Scheduler
 
 
 def main() -> None:

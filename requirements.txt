@@ -1,4 +1,0 @@
-pyautogui~=0.9.54
-jeepney~=0.7.1
-psutil~=6.0.0
-pynput~=1.7.7

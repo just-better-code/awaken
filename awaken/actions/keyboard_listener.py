@@ -1,4 +1,3 @@
-import threading
 import logging
 
 from pynput.keyboard import Listener

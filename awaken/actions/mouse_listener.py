@@ -1,7 +1,7 @@
 import logging
 
 from pynput.mouse import Listener
-from threading import Event, Lock, Condition
+from threading import Event, Lock
 
 
 class MouseListener:
