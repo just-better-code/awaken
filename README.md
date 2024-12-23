@@ -17,7 +17,7 @@ Ensure you have the following installed on your system:
    cd awaken
    ```
 
-2**Install dependencies**:
+2. **Install dependencies**:
    ```bash
    poetry install
    ```
