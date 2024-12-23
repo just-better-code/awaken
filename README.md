@@ -13,17 +13,11 @@ Ensure you have the following installed on your system:
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone https://github.com/just-better-code/awaken.git
+   cd awaken
    ```
 
-2. **Configure Python environment**:
-   Ensure you are using Python 3.12.x for this project.
-   ```bash
-   poetry env use 3.12
-   ```
-
-3. **Install dependencies**:
+2**Install dependencies**:
    ```bash
    poetry install
    ```
@@ -46,6 +40,10 @@ If you encounter any issues:
   ```bash
   poetry --version
   ```
+- Ensure you are using Python 3.12.x for this project.
+   ```bash
+   poetry env use 3.12
+   ```
 - Reinstall dependencies if needed:
   ```bash
   poetry install
