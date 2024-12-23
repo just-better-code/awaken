@@ -1,34 +1,35 @@
 import pyautogui as gui
 import random
 import math
+import logging
 
-from awaken.actions.mouse_listener import MouseListener
 from threading import Event, Lock
 from pyautogui import Point
 from typing import List
 
 
 class Cursor:
-    def __init__(self, interrupt: Event):
+    def __init__(self, user_activity: Event, lock: Lock):
+        self._log = logging.getLogger(__name__)
         self._current = gui.position()
-        self._interrupt = interrupt
-        self._lock = Lock()
-        listener = MouseListener(self._interrupt, self._lock)
-        listener.start()
+        self._user_activity = user_activity
+        self._lock = lock
+
 
     def move(self, x: int, y: int, speed: float = 10, rand_k: float = 0.5) -> None:
         for step in self._steps(x, y):
-            if self._interrupt.is_set():
+            if self._user_activity.is_set():
+                self._log.debug('Breaking movement because of user activity')
                 break
             offset = (-int(self._current.x - step.x), -int(self._current.y - step.y))
             with self._lock:
-                gui.move(*offset, self._duration(speed, rand_k), _pause=True)
+                gui.move(*offset, self._duration(speed, rand_k), _pause=False)
             self._current = gui.position()
             self._check(step)
 
     def _check(self, step):
         if self._current != step:
-            self._interrupt.set()
+            self._user_activity.set()
 
     @classmethod
     def _duration(cls, speed: float, rand_k: float) -> float:
@@ -46,7 +47,8 @@ class Cursor:
 
     def _steps_num(self, x, y) -> int:
         dist = math.dist(list(self._current), [x, y])
+        count = int(dist / 10)
 
-        return int(dist / 10)
+        return count
 
 

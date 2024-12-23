@@ -1,16 +1,18 @@
 import pyautogui as gui
+import logging
 
-from awaken.actions.keyboard_listener import KeyboardListener
 from threading import Event, Lock
 
 
 class Keyboard:
-    def __init__(self, interrupt: Event):
-        self._interrupt = interrupt
-        self._lock = Lock()
-        listener = KeyboardListener(self._interrupt, self._lock)
-        listener.start()
+    def __init__(self, user_activity: Event, lock: Lock):
+        self._log = logging.getLogger(__name__)
+        self._user_activity = user_activity
+        self._lock = lock
+
 
     def press(self, key: str) -> None:
-        if not self._interrupt.is_set() :
-            with self._lock: gui.press(key)
+        if not self._user_activity.is_set() :
+            with self._lock:
+                self._log.debug(f'Triggering press key `{key}`')
+                gui.press(key)
