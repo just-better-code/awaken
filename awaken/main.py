@@ -4,14 +4,16 @@ import logging
 from threading import Event
 from time import sleep
 from awaken import Actor, Scheduler
-
+from awaken.tui.app import App
 
 def main() -> None:
     logging.basicConfig()
-    logging.root.setLevel(logging.NOTSET)
+    logging.root.setLevel(logging.ERROR)
     log = logging.getLogger('Main')
     log.info('*** Program is started ***')
     args = parse_args()
+    tui = App(args)
+    tui.run()
     user_activity = Event()
     system_activity = Event()
     actor = Actor(system_activity, user_activity)
@@ -21,7 +23,7 @@ def main() -> None:
     while True:
         scheduler.ping()
         if scheduler.is_must_wake_up():
-            actor.move_cursor(args.get('dist'), args.get('speed'), args.get('rand_k'))
+            actor.move_cursor(args.get('dist'), args.get('speed'), args.get('random'))
             actor.press_key(args.get('key'))
         sleep(1)
 
@@ -42,9 +44,11 @@ def parse_args() -> dict:
         'dist': args.dist,
         'speed': args.speed,
         'key': args.key,
-        'rand_k': args.random
+        'random': args.random
     }
 
 if __name__ == "__main__":
     main()
+
+
 

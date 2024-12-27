@@ -41,6 +41,16 @@ python3-Xlib = {version = "*", markers = "platform_system == \"Linux\" and pytho
 rubicon-objc = {version = "*", markers = "platform_system == \"Darwin\""}
 
 [[package]]
+name = "npyscreen"
+version = "4.10.5"
+description = "Writing user interfaces without all that ugly mucking about in hyperspace"
+optional = false
+python-versions = "*"
+files = [
+    {file = "npyscreen-4.10.5.tar.gz", hash = "sha256:622ee0f9a5dae946e635b7c6e0f6d65e1ed3c9ea0d20b89dab7f58d580e5126e"},
+]
+
+[[package]]
 name = "psutil"
 version = "6.1.1"
 description = "Cross-platform lib for process and system monitoring in Python."
@@ -331,4 +341,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.12.0"
-content-hash = "d8aa408e80c0594239ac020235dd9dac3532059b2f874f170fd8520024e2cfa1"
+content-hash = "87093dd874f57cdf72480f74c6f15aef8ffe8a9baccbfb832ff55c7c70f8308b"

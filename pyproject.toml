@@ -11,7 +11,7 @@ pyautogui = "^0.9.54"
 jeepney = "^0.8.0"
 psutil = "^6.1.1"
 pynput = "^1.7.7"
-
+npyscreen = "^4.10.5"
 
 [build-system]
 requires = ["poetry-core"]

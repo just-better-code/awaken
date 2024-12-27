@@ -46,9 +46,3 @@ class Cursor:
         destination = Point(self._current.x + x, self._current.y + y)
 
         return Tweening.points(self._current, destination)
-
-    def _points_num(self, x, y) -> int:
-        dist = math.dist(list(self._current), [x, y])
-
-        return int(dist / 10)
-
