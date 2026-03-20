@@ -1,7 +1,7 @@
-import pyautogui as gui
 import logging
-
 from threading import Event, Lock
+
+import pyautogui as gui
 
 
 class Keyboard:
@@ -10,9 +10,8 @@ class Keyboard:
         self._user_activity = user_activity
         self._lock = lock
 
-
     def press(self, key: str) -> None:
-        if not self._user_activity.is_set() :
+        if not self._user_activity.is_set():
             with self._lock:
-                self._log.debug(f'Triggering press key `{key}`')
+                self._log.debug(f"Triggering press key `{key}`")
                 gui.press(key)

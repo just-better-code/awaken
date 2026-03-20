@@ -1,15 +1,15 @@
 import sys
-
-from . import Monitor
-from awaken.dto import LastInputInfo
 from ctypes import *
+
+from awaken.dto import LastInputInfo
+from awaken.system_idle_monitors.monitor import Monitor
 
 
 class WindowsMonitor(Monitor):
     @classmethod
     def validate(cls) -> None:
-        if sys.platform != 'win32':
-            raise OSError('Windows not detected')
+        if sys.platform != "win32":
+            raise OSError("Windows not detected")
 
     def get_idle_time(self) -> float:
         info = LastInputInfo()

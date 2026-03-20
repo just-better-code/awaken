@@ -1,15 +1,15 @@
-import subprocess
 import re
+import subprocess
 import sys
 
-from . import Monitor
+from awaken.system_idle_monitors.monitor import Monitor
 
 
 class OsXMonitor(Monitor):
     @classmethod
     def validate(cls) -> None:
-        if sys.platform != 'darwin':
-            raise OSError('MacOs system not detected')
+        if sys.platform != "darwin":
+            raise OSError("MacOs system not detected")
 
     def get_idle_time(self) -> float:
         cmd = ["ioreg", "-c", "IOHIDSystem"]

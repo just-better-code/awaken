@@ -1,16 +1,16 @@
-from . import Monitor
-from awaken.dto import *
-from ctypes import cdll, util, c_void_p, c_char_p, c_uint32, POINTER, c_int
+import os
+from ctypes import POINTER, c_char_p, c_int, c_uint32, c_void_p, cdll, util
 from typing import Any
 
-import os
+from awaken.dto import *
+from awaken.system_idle_monitors.monitor import Monitor
 
 
 class X11Monitor(Monitor):
     @classmethod
     def validate(cls) -> None:
-        if os.getenv('XDG_SESSION_TYPE', '').lower() != 'x11':
-            raise OSError('X11 based system not detected')
+        if os.getenv("XDG_SESSION_TYPE", "").lower() != "x11":
+            raise OSError("X11 based system not detected")
 
     def __init__(self) -> None:
         x11 = self.load_lib("X11")

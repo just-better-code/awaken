@@ -13,6 +13,28 @@ psutil = "^6.1.1"
 pynput = "^1.7.7"
 npyscreen = "^4.10.5"
 
+[tool.poetry.scripts]
+awaken = "awaken.main:main"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+ruff = "^0.8.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# ctypes / dto star-imports are intentional for platform bindings
+"awaken/system_idle_monitors/windows_monitor.py" = ["F403", "F405"]
+"awaken/system_idle_monitors/x_11_monitor.py" = ["F403", "F405"]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
