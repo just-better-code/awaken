@@ -1,5 +1,6 @@
 import logging
 import math
+import os
 from threading import Event, Lock
 
 import pyautogui as gui
@@ -51,6 +52,9 @@ class Cursor:
 
     def _check(self, steps):
         if self._current not in steps:
+            # Wayland/XWayland often reports coordinates that do not match PyAutoGUI's path.
+            if os.environ.get("XDG_SESSION_TYPE", "").strip().lower() == "wayland":
+                return
             self._log.debug(f"Mouse position {self._current} not in {steps}")
             self._user_activity.set()
 

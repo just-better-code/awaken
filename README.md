@@ -64,7 +64,7 @@ When **`awaken.actor`** is imported, Awaken sets **`pyautogui.FAILSAFE = False`*
 
 Idle detection tries monitors in order: **Windows** → **GNOME (Mutter) Wayland** → **KDE Plasma Wayland** (`org.kde.KIdleTime` on session D-Bus) → **X11** → **macOS**. If none apply, the app falls back to listener-based timing. Compositors without these APIs (e.g. some minimal wlroots setups) may only get accurate idle from the fallback.
 
-**Wayland (e.g. KDE Plasma):** global cursor/keyboard injection via PyAutoGUI is often **limited or flaky** compared to X11. If wakes error or behave oddly, try an **X11 session** or expect reduced reliability under Wayland.
+**Wayland (e.g. KDE Plasma):** global cursor/keyboard injection via PyAutoGUI is often **limited or flaky** compared to X11. On **Wayland**, Awaken **does not use** the OS idle monitor (e.g. KIdleTime) for wake scheduling — it uses **listener timestamps** instead, because those APIs usually **never reset** on synthetic input (which caused rapid repeated wakes and a stuck/jittering cursor). Override with **`AWAKEN_USE_NATIVE_IDLE=1`** if you need the old behavior. For OS-accurate idle + input, an **X11** session is still more predictable.
 
 ## Development
 

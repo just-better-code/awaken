@@ -1,4 +1,5 @@
 import logging
+import os
 from collections.abc import Callable
 from threading import Event
 from time import time
@@ -6,6 +7,9 @@ from typing import Optional
 
 from awaken.system_idle_monitors import Monitor
 from awaken.system_idle_monitors.monitor_factory import MonitorFactory
+
+# Never re-enter wake faster than this (even if delay in UI is small).
+_MIN_WAKE_GAP_S = 15.0
 
 
 class Scheduler:
@@ -39,6 +43,17 @@ class Scheduler:
         return self._system_idle_monitor.__class__.__name__
 
     def _build_idle_monitor(self) -> Optional["Monitor"]:
+        if (
+            os.environ.get("AWAKEN_USE_NATIVE_IDLE", "").strip().lower()
+            not in ("1", "true", "yes")
+            and os.environ.get("XDG_SESSION_TYPE", "").strip().lower() == "wayland"
+        ):
+            self._log.info(
+                "Wayland: OS idle monitor skipped for wake scheduling "
+                "(KIdleTime etc. usually ignore synthetic input). "
+                "Set AWAKEN_USE_NATIVE_IDLE=1 to force it, or use an X11 session."
+            )
+            return None
         monitor = MonitorFactory.build()
         if monitor is None:
             self._log.info("Cant initialize proper system idle monitor. Using legacy mode")
@@ -54,7 +69,11 @@ class Scheduler:
 
     def notify_wake_completed(self) -> None:
         """Call after each wake attempt so we do not re-enter while OS idle stays high."""
-        self._wake_grace_until = time() + float(self._delay)
+        now = time()
+        self._wake_grace_until = now + max(float(self._delay), _MIN_WAKE_GAP_S)
+        # Legacy path: KDE-style APIs often never drop after synthetic input; bumping this
+        # makes system_idle_seconds() sane until listeners fire again.
+        self._system_activity_ts = now
         self._system_activity.set()
 
     def ping(self) -> None:

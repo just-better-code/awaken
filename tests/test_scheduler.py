@@ -141,3 +141,26 @@ def test_idle_monitor_label_legacy(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("awaken.scheduler.MonitorFactory.build", lambda: None)
     s = Scheduler(Event(), Event(), 60, 30)
     assert s.idle_monitor_label == "Legacy (listener timestamps)"
+
+
+def test_wayland_skips_os_idle_monitor_without_calling_factory(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("XDG_SESSION_TYPE", "wayland")
+
+    def boom() -> None:
+        raise AssertionError("MonitorFactory.build should not run on Wayland")
+
+    monkeypatch.setattr("awaken.scheduler.MonitorFactory.build", boom)
+    s = Scheduler(Event(), Event(), 60, 30)
+    assert s.idle_monitor_label == "Legacy (listener timestamps)"
+
+
+def test_awaken_use_native_idle_forces_factory_on_wayland(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("XDG_SESSION_TYPE", "wayland")
+    monkeypatch.setenv("AWAKEN_USE_NATIVE_IDLE", "1")
+    monkeypatch.setattr("awaken.scheduler.MonitorFactory.build", lambda: None)
+    s = Scheduler(Event(), Event(), 60, 30)
+    assert s.idle_monitor_label == "Legacy (listener timestamps)"
