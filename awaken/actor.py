@@ -19,14 +19,14 @@ class Actor:
         self._mouse_listener.start()
         self._log.info('*** Actor is waked up ***')
 
-    def move_cursor(self, dist : int, speed: int = 10, rand_k: float = 0.5):
+    def move_cursor(self, dist : int):
         self._log.debug('Move cursor is triggered')
         action = Cursor(self._user_activity, self._mouse_lock)
         if not self._user_activity.is_set():
             self._log.debug(f'Move cursor to {dist} is triggered')
-            action.move(dist, dist, speed, rand_k)
+            action.move(dist, dist)
             self._log.debug(f'Move cursor to -{dist} is triggered')
-            action.move(-dist, -dist, speed, rand_k)
+            action.move(-dist, -dist)
 
     def press_key(self, key : str):
         self._log.debug('Press key is triggered')

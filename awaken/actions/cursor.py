@@ -1,11 +1,11 @@
 import pyautogui as gui
 import random
-import math
 import logging
+import math
 
 from threading import Event, Lock
 from pyautogui import Point
-from typing import List
+from typing import List, Tuple
 
 from awaken.actions.tweening import Tweening
 
@@ -18,7 +18,7 @@ class Cursor:
         self._lock = lock
 
 
-    def move(self, x: int, y: int, speed: float = 10, rand_k: float = 0.5) -> None:
+    def move(self, x: int, y: int) -> None:
         points = self._points_to(x, y)
         for point in points:
             if self._user_activity.is_set():
@@ -26,7 +26,7 @@ class Cursor:
                 break
             offset = (point.x - self._current.x, point.y - self._current.y)
             with self._lock:
-                gui.move(*offset, self._duration(speed, rand_k), _pause=False)
+                gui.move(*offset, self._duration(offset), _pause=False)
             self._current = gui.position()
             self._check(points)
 
@@ -35,12 +35,10 @@ class Cursor:
             self._log.debug(f'Mouse position {self._current} not in {steps}')
             self._user_activity.set()
 
-    @classmethod
-    def _duration(cls, speed: float, rand_k: float) -> float:
-        delta = rand_k * speed
-        speed = random.uniform(speed - delta, speed + delta)
+    def _duration(self, offset: Tuple[float, float]) -> float:
+        dist = math.dist(list(self._current), list(offset))
 
-        return 1 / speed
+        return 10 / dist
 
     def _points_to(self, x, y) -> List[Point]:
         destination = Point(self._current.x + x, self._current.y + y)
