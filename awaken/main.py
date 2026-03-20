@@ -1,6 +1,7 @@
 import argparse
 import logging
 
+from awaken.actions.keyboard import sanitize_wake_key
 from awaken.dto.app_config import AppConfig
 from awaken.tui.app import App
 
@@ -75,7 +76,7 @@ def parse_args(argv: list[str] | None = None) -> AppConfig:
     return AppConfig(
         idle=ns.idle,
         delay=ns.delay,
-        key=ns.key,
+        key=sanitize_wake_key(ns.key),
         dist=ns.dist,
         speed=ns.speed,
         random=ns.random,

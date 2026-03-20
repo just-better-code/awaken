@@ -36,6 +36,8 @@ CLI flags set the **initial** values; in the TUI you can edit **idle**, **delay*
 - **Quit**: press **Tab** until the **` Quit `** button is highlighted, then **Enter**.
 - **Ctrl+C** in the terminal also stops the process (less clean than Quit, but works).
 
+Do **not** use **Esc** as the wake **key** in the combo (it is not listed): PyAutoGUI sends a real session-level Esc, which on **KDE** can hit global shortcuts or confuse apps (e.g. Spectacle). If you passed `--key esc` on the CLI, it is treated as **`shift`** instead.
+
 Equivalent:
 
 ```bash

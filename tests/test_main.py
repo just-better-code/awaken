@@ -43,3 +43,8 @@ def test_parse_args_wheel_clicks() -> None:
 def test_parse_args_wheel_clicks_negative() -> None:
     with pytest.raises(SystemExit):
         parse_args(["--wheel-clicks", "-1"])
+
+
+def test_parse_args_esc_wake_key_becomes_shift() -> None:
+    assert parse_args(["--key", "esc"])["key"] == "shift"
+    assert parse_args(["--key", "ESCAPE"])["key"] == "shift"

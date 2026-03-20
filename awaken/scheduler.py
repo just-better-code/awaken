@@ -28,6 +28,9 @@ class Scheduler:
         self._system_activity_ts = time()
         self._idle = idle
         self._delay = delay
+        # After a wake, OS idle monitors (e.g. KDE) often ignore synthetic input; without a
+        # cooldown, is_must_wake_up stays true and the worker hammers the cursor every second.
+        self._wake_grace_until = 0.0
 
     @property
     def idle_monitor_label(self) -> str:
@@ -45,7 +48,14 @@ class Scheduler:
         return monitor
 
     def is_must_wake_up(self) -> bool:
+        if time() < self._wake_grace_until:
+            return False
         return self._user_idle() > self._idle and self._system_idle() > self._delay
+
+    def notify_wake_completed(self) -> None:
+        """Call after each wake attempt so we do not re-enter while OS idle stays high."""
+        self._wake_grace_until = time() + float(self._delay)
+        self._system_activity.set()
 
     def ping(self) -> None:
         if self._user_activity.is_set():

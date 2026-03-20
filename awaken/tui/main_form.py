@@ -24,6 +24,8 @@ def _field_text(widget: Any) -> str:
 def _key_choice_list(current: str) -> tuple[list[str], int]:
     """Ordered keys for pyautogui.press; current config is always selectable."""
     normalized = str(current).strip().lower() or "shift"
+    if normalized in ("esc", "escape"):
+        normalized = "shift"
     choices = [
         "shift",
         "ctrl",
@@ -32,7 +34,6 @@ def _key_choice_list(current: str) -> tuple[list[str], int]:
         "tab",
         "enter",
         "return",
-        "esc",
         "backspace",
         "delete",
         "home",

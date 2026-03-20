@@ -103,6 +103,7 @@ class App(NPSAppManaged):
                         )
                 finally:
                     self._emulating_wake.clear()
+                self._scheduler.notify_wake_completed()
             if self._stop.wait(timeout=1.0):
                 break
         self._enqueue_ui_log("Worker stopping.")
