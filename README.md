@@ -7,6 +7,13 @@ CLI/TUI utility that simulates light user activity (cursor moves and key presses
 - [Python 3.12.x](https://www.python.org/downloads/release/python-3120/)
 - [Poetry](https://python-poetry.org/docs/#installation)
 
+On **Linux**, `pynput` installs **evdev**, which builds a small C extension. You need a C compiler and **Python development headers** matching the interpreter Poetry uses (the same major.minor as `python3.12`):
+
+| Distribution | Typical packages |
+|----------------|------------------|
+| **Fedora / RHEL / CentOS Stream** | `sudo dnf install gcc python3.12-devel` — or `python3-devel` if it matches your Python 3.12 |
+| **Debian / Ubuntu** | `sudo apt install build-essential python3.12-dev` (or `python3-dev` if aligned with 3.12) |
+
 ## Installation
 
 ```bash
@@ -49,11 +56,13 @@ poetry run python -m awaken.main
 
 ## PyAutoGUI failsafe
 
-By default, moving the mouse to a **screen corner** can trigger PyAutoGUI’s failsafe and raise an exception. See the [PyAutoGUI docs](https://pyautogui.readthedocs.io/) for behavior and how to adjust `FAILSAFE` / `PAUSE` if needed.
+When **`awaken.actor`** is imported, Awaken sets **`pyautogui.FAILSAFE = False`** and **`PAUSE = 0`** (before any cursor moves). Wake cycles move the pointer by **`dist` pixels** each axis; with the stock failsafe, reaching a **screen corner** raises `FailSafeException`, which used to **kill the worker thread** and leave the TUI looking frozen. Disabling the corner failsafe matches typical “keep awake” tools; you can still stop the app with **Quit** or **Ctrl+C**. See [PyAutoGUI failsafe](https://pyautogui.readthedocs.io/) if you fork the project and want different behavior.
 
 ## Platform notes
 
 Idle detection tries monitors in order: **Windows** → **GNOME (Mutter) Wayland** → **KDE Plasma Wayland** (`org.kde.KIdleTime` on session D-Bus) → **X11** → **macOS**. If none apply, the app falls back to listener-based timing. Compositors without these APIs (e.g. some minimal wlroots setups) may only get accurate idle from the fallback.
+
+**Wayland (e.g. KDE Plasma):** global cursor/keyboard injection via PyAutoGUI is often **limited or flaky** compared to X11. If wakes error or behave oddly, try an **X11 session** or expect reduced reliability under Wayland.
 
 ## Development
 
@@ -67,5 +76,7 @@ poetry run ruff format --check awaken tests
 ## Troubleshooting
 
 - Confirm Python 3.12: `python --version` / `poetry env use 3.12`
+- **`evdev` / `Python.h: No such file`:** install OS packages above (`python3.12-devel` / `python3-devel` on Fedora, `python3.12-dev` on Debian). Headers must match the Python used by `poetry install`.
 - Reinstall deps: `poetry install`
 - On Linux display servers, ensure input monitoring / X11 extensions match your session (X11 vs Wayland).
+- **Worker / wake errors** (e.g. PyAutoGUI on Wayland): check the **Log** line; the worker keeps running. **Quit** or **Ctrl+C** should still exit; if the TUI is stuck, close the terminal tab.

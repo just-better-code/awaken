@@ -2,6 +2,13 @@ import logging
 import time
 from threading import Event, Lock
 
+import pyautogui as gui
+
+# Before other awaken modules call gui.*: scripted moves cross corners; stock FAILSAFE
+# raises in the worker thread and stops all wakes.
+gui.FAILSAFE = False
+gui.PAUSE = 0
+
 from awaken.actions.cursor import Cursor
 from awaken.actions.keyboard import Keyboard
 from awaken.actions.keyboard_listener import KeyboardListener

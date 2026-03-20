@@ -213,7 +213,7 @@ class MainForm(FormBaseNew):
             when_pressed_function=quit_app,
             relx=1,
         )
-        # Single-line TitleText only: TitleMultiLine/MultiLine often crashes on short pads (height False).
+        # Single-line TitleText: MultiLine often crashes on short pads (height False).
         self._log_widget = self.add(
             TitleText,
             name="Log",

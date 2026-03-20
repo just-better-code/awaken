@@ -3,6 +3,7 @@ from datetime import datetime
 from logging import Logger
 from threading import Event, Lock, Thread
 
+import pyautogui as gui
 from npyscreen import NPSAppManaged
 
 from awaken import Actor, Scheduler
@@ -86,13 +87,20 @@ class App(NPSAppManaged):
                 with self._config_lock:
                     dist = int(self._args["dist"])
                     key = str(self._args["key"])
-                    wheel_n = int(self._args["wheel_clicks"])
-                extra = f" + wheel ±{wheel_n}" if wheel_n else ""
                 self._emulating_wake.set()
                 try:
-                    self._actor.move_cursor(dist)
-                    self._actor.press_key(key)
-                    self._actor.nudge_wheel()
+                    try:
+                        self._actor.move_cursor(dist)
+                        self._actor.press_key(key)
+                        self._actor.nudge_wheel()
+                    except gui.FailSafeException:
+                        self._enqueue_ui_log(
+                            "PyAutoGUI failsafe (corner). Lower dist (px) if this persists."
+                        )
+                    except Exception as e:
+                        self._enqueue_ui_log(
+                            f"Wake error: {type(e).__name__}: {e}"
+                        )
                 finally:
                     self._emulating_wake.clear()
             if self._stop.wait(timeout=1.0):
