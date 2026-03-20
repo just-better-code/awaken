@@ -42,7 +42,8 @@ class App(NPSAppManaged):
             on_user_return_after_idle=self._on_user_return_after_idle,
         )
         self._actor.set_wheel_clicks(self._args["wheel_clicks"])
-        self._main = Thread(target=self._perform, daemon=False)
+        # Daemon: worker can block on PyAutoGUI/pynput under Wayland; exit must not hang on join.
+        self._main = Thread(target=self._perform, daemon=True)
 
     def onStart(self) -> None:
         self._args_form = self.addForm(
@@ -76,7 +77,7 @@ class App(NPSAppManaged):
     def onCleanExit(self) -> None:
         self._stop.set()
         self._actor.shutdown()
-        self._main.join(timeout=5.0)
+        self._main.join(timeout=2.0)
 
     def _perform(self) -> None:
         self._enqueue_ui_log("*** Lets work ***")

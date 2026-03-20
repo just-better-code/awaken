@@ -25,9 +25,11 @@ class MouseListener(Listener):
     def _act(self, *args) -> None:
         if self._ignore_mouse_events is not None and self._ignore_mouse_events.is_set():
             return
+        # Always mark system activity: if user_activity is already set we used to return
+        # early and never refreshed system idle (legacy / Wayland looked like a dumb timer).
+        self._system_activity.set()
         if self._user_activity.is_set():
             return
-        self._system_activity.set()
         in_wake = (
             self._emulating_wake is not None and self._emulating_wake.is_set()
         )

@@ -28,9 +28,9 @@ class KeyboardListener(Listener):
             and self._ignore_keyboard_events.is_set()
         ):
             return
+        self._system_activity.set()
         if self._user_activity.is_set():
             return
-        self._system_activity.set()
         in_wake = (
             self._emulating_wake is not None and self._emulating_wake.is_set()
         )

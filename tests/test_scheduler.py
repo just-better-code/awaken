@@ -143,24 +143,59 @@ def test_idle_monitor_label_legacy(monkeypatch: pytest.MonkeyPatch) -> None:
     assert s.idle_monitor_label == "Legacy (listener timestamps)"
 
 
-def test_wayland_skips_os_idle_monitor_without_calling_factory(
+def test_wayland_calls_factory_for_os_idle_display(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("XDG_SESSION_TYPE", "wayland")
 
-    def boom() -> None:
-        raise AssertionError("MonitorFactory.build should not run on Wayland")
+    class FakeMon:
+        def get_idle_time(self) -> float:
+            return 12.0
 
-    monkeypatch.setattr("awaken.scheduler.MonitorFactory.build", boom)
+    monkeypatch.setattr(
+        "awaken.scheduler.MonitorFactory.build", lambda: FakeMon()
+    )
     s = Scheduler(Event(), Event(), 60, 30)
-    assert s.idle_monitor_label == "Legacy (listener timestamps)"
+    assert s.idle_monitor_label == "FakeMon"
+    assert s.system_idle_seconds() == pytest.approx(12.0)
 
 
-def test_awaken_use_native_idle_forces_factory_on_wayland(
+def test_wayland_wake_uses_listeners_not_os_idle_by_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """OS idle can stay huge on Wayland after synthetic input; wake must not use it."""
+    monkeypatch.setenv("XDG_SESSION_TYPE", "wayland")
+
+    class FakeMon:
+        def get_idle_time(self) -> float:
+            return 999.0
+
+    monkeypatch.setattr(
+        "awaken.scheduler.MonitorFactory.build", lambda: FakeMon()
+    )
+    clock = {"t": 1000.0}
+    monkeypatch.setattr("awaken.scheduler.time", lambda: clock["t"])
+    s = Scheduler(Event(), Event(), idle=60, delay=30)
+    clock["t"] = 1005.0
+    assert s.system_idle_seconds() == pytest.approx(999.0)
+    assert not s.is_must_wake_up()
+
+
+def test_awaken_use_native_idle_uses_os_idle_for_wake_on_wayland(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("XDG_SESSION_TYPE", "wayland")
     monkeypatch.setenv("AWAKEN_USE_NATIVE_IDLE", "1")
-    monkeypatch.setattr("awaken.scheduler.MonitorFactory.build", lambda: None)
-    s = Scheduler(Event(), Event(), 60, 30)
-    assert s.idle_monitor_label == "Legacy (listener timestamps)"
+
+    class FakeMon:
+        def get_idle_time(self) -> float:
+            return 999.0
+
+    monkeypatch.setattr(
+        "awaken.scheduler.MonitorFactory.build", lambda: FakeMon()
+    )
+    clock = {"t": 1000.0}
+    monkeypatch.setattr("awaken.scheduler.time", lambda: clock["t"])
+    s = Scheduler(Event(), Event(), idle=60, delay=30)
+    clock["t"] = 1065.0
+    assert s.is_must_wake_up()

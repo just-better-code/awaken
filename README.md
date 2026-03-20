@@ -49,7 +49,7 @@ poetry run python -m awaken.main
 | Option | Description |
 |--------|-------------|
 | `--idle` | Seconds without **user** input before actions (default: 60) |
-| `--delay` | Seconds without **system** idle signal in legacy/fallback mode (default: 30) |
+| `--delay` | Seconds without **system** idle before wake (OS idle when used; on Wayland see platform notes) (default: 30) |
 | `--key` | Key to press (default: `shift`) |
 | `--dist` | Cursor move distance in pixels per axis (default: 500) |
 | `--speed` | Move speed scale — higher is faster per segment (default: 10) |
@@ -64,7 +64,7 @@ When **`awaken.actor`** is imported, Awaken sets **`pyautogui.FAILSAFE = False`*
 
 Idle detection tries monitors in order: **Windows** → **GNOME (Mutter) Wayland** → **KDE Plasma Wayland** (`org.kde.KIdleTime` on session D-Bus) → **X11** → **macOS**. If none apply, the app falls back to listener-based timing. Compositors without these APIs (e.g. some minimal wlroots setups) may only get accurate idle from the fallback.
 
-**Wayland (e.g. KDE Plasma):** global cursor/keyboard injection via PyAutoGUI is often **limited or flaky** compared to X11. On **Wayland**, Awaken **does not use** the OS idle monitor (e.g. KIdleTime) for wake scheduling — it uses **listener timestamps** instead, because those APIs usually **never reset** on synthetic input (which caused rapid repeated wakes and a stuck/jittering cursor). Override with **`AWAKEN_USE_NATIVE_IDLE=1`** if you need the old behavior. For OS-accurate idle + input, an **X11** session is still more predictable.
+**Wayland (e.g. KDE Plasma):** global cursor/keyboard injection via PyAutoGUI is often **limited or flaky** compared to X11. **System idle** in the TUI comes from the **OS** (e.g. `org.kde.KIdleTime`) when that monitor initializes. For **wake scheduling**, the **system-idle** part of the condition still uses **listener timestamps** by default, because many compositors **do not reset** OS idle on synthetic input (which used to cause rapid repeated wakes). Set **`AWAKEN_USE_NATIVE_IDLE=1`** to use OS idle for wakes on Wayland as well. For the most predictable combo of injection + idle, an **X11** session is still easier.
 
 ## Development
 
@@ -82,3 +82,4 @@ poetry run ruff format --check awaken tests
 - Reinstall deps: `poetry install`
 - On Linux display servers, ensure input monitoring / X11 extensions match your session (X11 vs Wayland).
 - **Worker / wake errors** (e.g. PyAutoGUI on Wayland): check the **Log** line; the worker keeps running. **Quit** or **Ctrl+C** should still exit; if the TUI is stuck, close the terminal tab.
+- **System idle** not moving when you use the mouse: was a listener bug (fixed): `system_activity` must be set on every move, not only when `user_activity` was clear.

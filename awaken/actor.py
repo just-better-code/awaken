@@ -118,5 +118,5 @@ class Actor:
     def shutdown(self) -> None:
         self._keyboard_listener.stop()
         self._mouse_listener.stop()
-        self._keyboard_listener.join()
-        self._mouse_listener.join()
+        self._keyboard_listener.join(timeout=2.0)
+        self._mouse_listener.join(timeout=2.0)

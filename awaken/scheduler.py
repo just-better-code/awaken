@@ -43,29 +43,44 @@ class Scheduler:
         return self._system_idle_monitor.__class__.__name__
 
     def _build_idle_monitor(self) -> Optional["Monitor"]:
-        if (
-            os.environ.get("AWAKEN_USE_NATIVE_IDLE", "").strip().lower()
-            not in ("1", "true", "yes")
-            and os.environ.get("XDG_SESSION_TYPE", "").strip().lower() == "wayland"
-        ):
-            self._log.info(
-                "Wayland: OS idle monitor skipped for wake scheduling "
-                "(KIdleTime etc. usually ignore synthetic input). "
-                "Set AWAKEN_USE_NATIVE_IDLE=1 to force it, or use an X11 session."
-            )
-            return None
         monitor = MonitorFactory.build()
         if monitor is None:
             self._log.info("Cant initialize proper system idle monitor. Using legacy mode")
         else:
-            self._log.info(f"Using {monitor.__class__.__name__} for system idle monitoring")
-
+            self._log.info(
+                "Using %s for system idle display",
+                monitor.__class__.__name__,
+            )
+            if (
+                os.environ.get("XDG_SESSION_TYPE", "").strip().lower() == "wayland"
+                and os.environ.get("AWAKEN_USE_NATIVE_IDLE", "").strip().lower()
+                not in ("1", "true", "yes")
+            ):
+                self._log.info(
+                    "Wayland: wake scheduling still uses listener timestamps for the "
+                    "system-idle check (OS APIs often ignore synthetic input). "
+                    "Set AWAKEN_USE_NATIVE_IDLE=1 to use OS idle for wakes too."
+                )
         return monitor
+
+    def _native_idle_for_wake(self) -> bool:
+        if self._system_idle_monitor is None:
+            return False
+        if os.environ.get("XDG_SESSION_TYPE", "").strip().lower() == "wayland":
+            return os.environ.get("AWAKEN_USE_NATIVE_IDLE", "").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+            )
+        return True
 
     def is_must_wake_up(self) -> bool:
         if time() < self._wake_grace_until:
             return False
-        return self._user_idle() > self._idle and self._system_idle() > self._delay
+        return (
+            self._user_idle() > self._idle
+            and self._system_idle_for_wake() > self._delay
+        )
 
     def notify_wake_completed(self) -> None:
         """Call after each wake attempt so we do not re-enter while OS idle stays high."""
@@ -83,6 +98,8 @@ class Scheduler:
             self._session_user_idle += span
             self._user_activity_ts = now
             self._user_activity.clear()
+            # Keep legacy system-idle clock aligned with real input (listeners can coalesce).
+            self._system_activity_ts = now
             self._log.debug("Detected user activity")
             if (
                 self._on_user_return_after_idle is not None
@@ -94,8 +111,13 @@ class Scheduler:
             self._system_activity.clear()
             self._log.debug("Detected system activity")
 
-    def _system_idle(self) -> float:
+    def _system_idle_for_display(self) -> float:
         if self._system_idle_monitor is not None:
+            return self._system_idle_monitor.get_idle_time()
+        return time() - self._system_activity_ts
+
+    def _system_idle_for_wake(self) -> float:
+        if self._native_idle_for_wake():
             return self._system_idle_monitor.get_idle_time()
         return time() - self._system_activity_ts
 
@@ -112,7 +134,7 @@ class Scheduler:
 
     def system_idle_seconds(self) -> float:
         """Seconds of system idle from OS monitor or listener-based fallback."""
-        return self._system_idle()
+        return self._system_idle_for_display()
 
     def set_thresholds(self, idle: int, delay: int) -> None:
         self._idle = max(1, int(idle))
